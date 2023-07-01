@@ -4,6 +4,7 @@ from typing import Optional
 import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, Body, UploadFile
 from loguru import logger
+import traceback
 
 from models.api import (
     DeleteRequest,
@@ -20,7 +21,12 @@ from starlette.responses import FileResponse
 
 from models.models import DocumentMetadata, Source
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import os
+import openai
 
+load_dotenv()
+openai.api_key = os.environ["OPENAI_API_KEY"]
 
 app = FastAPI()
 
@@ -111,6 +117,7 @@ async def query_main(request: QueryRequest = Body(...)):
         return QueryResponse(results=results)
     except Exception as e:
         logger.error(e)
+        logger.error(traceback.format_exc())  # This will print the stack trace
         raise HTTPException(status_code=500, detail="Internal Service Error")
 
 
